@@ -1,9 +1,14 @@
-import '../css/styles.css';
 import debounce from 'lodash.debounce';
 
+import '../css/styles.css';
+
 import { refs } from './refs';
-import { onManyResults, onNoResults } from './notify';
-import { fetchCountries, filtersToString } from './fetchCountries';
+import { onManyResultsAlert, onNoResultsAlert } from './notify';
+import { fetchCountries } from './fetchCountries';
+import {
+  createCountryCardMarkup,
+  createCountryListMarkup,
+} from './createMarkup';
 
 const DEBOUNCE_DELAY = 300;
 
@@ -16,7 +21,37 @@ function onInputChange(e) {
     return;
   }
 
-  fetchCountries(inputValue);
+  fetchCountries(inputValue)
+    .then(data => {
+      dataFilter(data);
+    })
+    .catch(() => {
+      clearMarkup();
+      onNoResultsAlert();
+    });
+}
+
+function dataFilter(data) {
+  const length = data.length;
+
+  if (length > 10) {
+    onManyResultsAlert();
+    clearMarkup();
+    return;
+  } else if (length >= 2 && length <= 10) {
+    clearMarkup();
+    data.forEach(country => createCountryListMarkup(country));
+    return;
+  } else {
+    clearMarkup();
+    createCountryCardMarkup(...data);
+    return;
+  }
+}
+
+function clearMarkup() {
+  refs.countryList.innerHTML = '';
+  refs.countryCard.innerHTML = '';
 }
 
 /*
@@ -36,11 +71,13 @@ function onInputChange(e) {
     -ошибка
 }
 
---запрос на сервер
++ --запрос на сервер
 
 --рендринг списка
 
 --рендринг карточки
+
++ -- фильтр
 
       
 }
