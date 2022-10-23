@@ -18,6 +18,7 @@ function onInputChange(e) {
   const inputValue = e.target.value.trim().toLowerCase();
 
   if (!inputValue) {
+    clearMarkup();
     return;
   }
 
